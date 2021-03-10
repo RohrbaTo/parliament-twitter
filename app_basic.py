@@ -6,7 +6,6 @@ import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
 from sklearn.feature_extraction.text import CountVectorizer
-from nltk.corpus import stopwords
 import plotly.graph_objects as go
 import networkx as nx
 
@@ -16,8 +15,11 @@ app = dash.Dash(__name__)
 
 # ------------------------------------------------------------------------------
 # Import and clean data (importing csv into pandas)
-df = pd.read_csv('tweets_210308.csv', sep=';', low_memory=False)
+stop_words  = pd.read_csv('stop_words.csv', sep=';', low_memory=False)
+stop_words = list(stop_words['aber'])
+stop_words = stop_words.extend('aber')
 
+df = pd.read_csv('tweets_210308.csv', sep=';', low_memory=False)
 df['created_at'] = pd.to_datetime(df['created_at'], errors='coerce')
 
 df['count'] =list(np.repeat(1, len(df)))
@@ -59,18 +61,20 @@ df_person  = df_person.sort_values(by = 'abs_count', ascending=False)
 
 ######## text stuff #######
 #create stop word list and clean corpus
-stop_words = stopwords.words('german')
-stop_words.extend(stopwords.words('french'))
-stop_words.extend(stopwords.words('italian'))
-stop_words.extend(stopwords.words('english'))
-stop_words.extend(['https', 'dass', 'rt', 'mehr', 'ab',
-                   'co','schon', 'seit', 'gibt',
-                   'amp', 'geht', 'wurde','jahren','wäre',
-                   'beim', 'wer','viele','einfach', 'kommt',
-                   'neue',
-                   'hui','aujourd','sans','tous','cette','comme',
-                   'les', 'plus','fait','très', 'faut',
-                   '12', 'sempre','26','17']) #add useless stuff to stopwords
+# stop_words = stopwords.words('german')
+# stop_words.extend(stopwords.words('french'))
+# stop_words.extend(stopwords.words('italian'))
+# stop_words.extend(stopwords.words('english'))
+# stop_words.extend(['https', 'dass', 'rt', 'mehr', 'ab',
+#                    'co','schon', 'seit', 'gibt',
+#                    'amp', 'geht', 'wurde','jahren','wäre',
+#                    'beim', 'wer','viele','einfach', 'kommt',
+#                    'neue',
+#                    'hui','aujourd','sans','tous','cette','comme',
+#                    'les', 'plus','fait','très', 'faut',
+#                    '12', 'sempre','26','17']) #add useless stuff to stopwords
+#
+# np.savetxt('stop_words.csv', stop_words, delimiter = ";",fmt ='% s')
 
 def get_top_n_words(corpus, n=None):
     vec = CountVectorizer(stop_words = stop_words).fit(corpus)
